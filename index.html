@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Comparativo de Taxas PagLucro</title>
+  <style>
+    /* Base PagLucro */
+    body {
+      font-family: Arial, sans-serif;
+      background: #010729;
+      color: #fff;
+      padding: 20px;
+      margin: 0;
+    }
+    .container {
+      background: #1a3950;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      margin: auto;
+      max-width: 600px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    h2 {
+      text-align: center;
+      color: #a1db00;
+      margin-top: 0;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: none;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    input, select {
+      background: #fff;
+      color: #000;
+    }
+    button {
+      background: #a1db00;
+      color: #010729;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #89b000;
+    }
+    .result {
+      display: none;
+      margin-top: 25px;
+      background: #fff;
+      color: #010729;
+      border-left: 5px solid #a1db00;
+      padding: 15px;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    .cols {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .cols > div {
+      width: 48%;
+    }
+    .cols h3 {
+      margin-top: 0;
+      color: #007bff;
+    }
+    .economia {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #a1db00;
+    }
+
+    /* Responsividade */
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+      .container {
+        padding: 15px;
+      }
+      label, input, select, button {
+        font-size: 1rem;
+      }
+      .cols {
+        flex-direction: column;
+      }
+      .cols > div {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Comparativo de Taxas PagLucro</h2>
+
+    <label for="valor">Valor da Venda (R$):</label>
+    <input type="text" id="valor" placeholder="0,00"/>
+
+    <label for="meuPlano">Meu Plano:</label>
+    <select id="meuPlano">
+      <option>Pag Pro</option>
+      <option>Pag Super</option>
+      <option>Pag Lucro</option>
+    </select>
+
+    <label for="tonPlano">Plano do Ton:</label>
+    <select id="tonPlano">
+      <option>Ton Pro</option>
+      <option>Ton Mega</option>
+      <option>Ton Super</option>
+    </select>
+
+    <label for="bandeira">Bandeira:</label>
+    <select id="bandeira">
+      <option>Mastercard/Visa</option>
+      <option>Elo</option>
+    </select>
+
+    <label for="tipo">Tipo de Pagamento:</label>
+    <select id="tipo" onchange="toggleParcelas()">
+      <option>Débito</option>
+      <option>Crédito à Vista</option>
+      <option>Crédito Parcelado</option>
+    </select>
+
+    <div id="parcelasDiv" style="display:none;">
+      <label for="parcelas">Número de Parcelas:</label>
+      <select id="parcelas"></select>
+    </div>
+
+    <button onclick="calcularTaxa()">Calcular</button>
+
+    <div class="result" id="resultado"></div>
+  </div>
+
+  <script>
+    // dados das minhas taxas
+    const minhasTaxas = {
+      "Pag Pro": {
+        "Mastercard/Visa": { "Débito":0.99, "Crédito à Vista":2.99, "Crédito Parcelado":[6.16,6.94,7.70,8.45,9.20,9.94,10.67,11.40,12.12,12.82,13.52,14.22] },
+        "Elo":               { "Débito":1.10, "Crédito à Vista":3.20, "Crédito Parcelado":[6.16,6.94,7.70,8.45,9.20,9.94,10.67,11.40,12.12,12.82,13.52,14.22] }
+      },
+      "Pag Super": {
+        "Mastercard/Visa": { "Débito":1.39, "Crédito à Vista":2.91, "Crédito Parcelado":[4.49,5.22,5.94,6.66,7.36,8.11,8.81,9.49,10.18,10.85,11.51,12.18] },
+        "Elo":               { "Débito":1.45, "Crédito à Vista":3.24, "Crédito Parcelado":[4.64,5.37,6.09,6.81,7.51,8.31,9.01,9.69,10.38,11.05,11.71,12.38] }
+      },
+      "Pag Lucro": {
+        "Mastercard/Visa": { "Débito":1.39, "Crédito à Vista":2.93, "Crédito Parcelado":[4.27,5.00,5.72,6.44,7.14,7.71,8.41,9.09,9.78,10.45,11.11,11.78] },
+        "Elo":               { "Débito":1.45, "Crédito à Vista":3.24, "Crédito Parcelado":[4.47,5.20,5.92,6.64,7.34,7.91,8.61,9.29,9.98,10.65,11.31,11.98] }
+      }
+    };
+
+    // dados das taxas do Ton
+    const taxasDoTon = {
+      "Ton Pro": {
+        "Mastercard/Visa": { "Débito":1.45, "Crédito à Vista":3.51, "Crédito Parcelado":[6.99,6.99,7.99,9.99,10.99,11.99,11.99,12.99,13.99,14.79,14.79] },
+        "Elo":               { "Débito":1.45, "Crédito à Vista":3.51, "Crédito Parcelado":[6.99,6.99,7.99,9.99,10.99,11.99,11.99,12.99,13.99,14.79,14.79] }
+      },
+      "Ton Mega": {
+        "Mastercard/Visa": { "Débito":1.69, "Crédito à Vista":3.86, "Crédito Parcelado":[9.86,11.24,12.59,13.92,15.22,16.50,17.76,18.99,20.19,20.39,20.39] },
+        "Elo":               { "Débito":1.69, "Crédito à Vista":3.86, "Crédito Parcelado":[9.86,11.24,12.59,13.92,15.22,16.50,17.76,18.99,20.19,20.39,20.39] }
+      },
+      "Ton Super": {
+        "Mastercard/Visa": { "Débito":1.98, "Crédito à Vista":4.98, "Crédito Parcelado":[9.91,11.29,12.64,13.97,15.27,16.55,17.81,19.04,20.24,21.43,22.59] },
+        "Elo":               { "Débito":1.98, "Crédito à Vista":4.98, "Crédito Parcelado":[9.91,11.29,12.64,13.97,15.27,16.55,17.81,19.04,20.24,21.43,22.59] }
+      }
+    };
+
+    // popula parcelas (2×–12×)
+    const selParc = document.getElementById("parcelas");
+    for (let i = 2; i <= 12; i++) {
+      let o = document.createElement("option");
+      o.value = i;
+      o.textContent = `${i}x`;
+      selParc.appendChild(o);
+    }
+
+    function toggleParcelas() {
+      document.getElementById("parcelasDiv").style.display =
+        document.getElementById("tipo").value === "Crédito Parcelado"
+          ? "block"
+          : "none";
+    }
+
+    // formata BRL
+    const fmt = v =>
+      new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v);
+
+    // máscara de moeda
+    const inp = document.getElementById("valor");
+    inp.addEventListener("input", () => {
+      let d = inp.value.replace(/\D/g, "");
+      if (!d) {
+        inp.value = "";
+        return;
+      }
+      let n = parseInt(d),
+        c = n % 100,
+        r = Math.floor(n / 100);
+      inp.value = `${r.toLocaleString("pt-BR")},${c.toString().padStart(2, "0")}`;
+    });
+
+    function calcularTaxa() {
+      let raw = inp.value.replace(/\./g, "").replace(",", ".");
+      let valor = parseFloat(raw);
+      if (!valor || valor <= 0) {
+        alert("Digite um valor válido.");
+        return;
+      }
+
+      let meu = document.getElementById("meuPlano").value,
+        ton = document.getElementById("tonPlano").value,
+        ban = document.getElementById("bandeira").value,
+        tipo = document.getElementById("tipo").value,
+        p = tipo === "Crédito Parcelado" ? parseInt(selParc.value) : 1;
+
+      let tMeu =
+        tipo === "Crédito Parcelado"
+          ? minhasTaxas[meu][ban][tipo][p - 2]
+          : minhasTaxas[meu][ban][tipo];
+      let tTon =
+        tipo === "Crédito Parcelado"
+          ? taxasDoTon[ton][ban][tipo][p - 2]
+          : taxasDoTon[ton][ban][tipo];
+
+      let recMeu = valor * (1 - tMeu / 100),
+        recTon = valor * (1 - tTon / 100),
+        cobMeu = valor / (1 - tMeu / 100),
+        cobTon = valor / (1 - tTon / 100),
+        econ = recMeu - recTon,
+        econCliente = cobTon - cobMeu;
+
+      const out = document.getElementById("resultado");
+      out.innerHTML = `
+        <div class="cols">
+          <div>
+            <h3>Minhas Taxas</h3>
+            <p>Taxa: ${tMeu.toFixed(2)}%</p>
+            <p>Você recebe: ${fmt(recMeu)}</p>
+            <p>Deveria cobrar: ${fmt(cobMeu)}</p>
+          </div>
+          <div>
+            <h3>Taxas do Ton</h3>
+            <p>Taxa: ${tTon.toFixed(2)}%</p>
+            <p>Você receberia: ${fmt(recTon)}</p>
+            <p>Deveria cobrar: ${fmt(cobTon)}</p>
+          </div>
+        </div>
+        <div class="economia">
+          Você economiza <strong>${fmt(econ)}</strong> comparado ao Ton!
+        </div>
+        ${tipo === "Crédito Parcelado" ? `
+        <div class="economia">
+          Seu cliente economiza <strong>${fmt(econCliente)}</strong> comparado ao Ton!
+        </div>` : ``}
+      `;
+      out.style.display = "block";
+    }
+  </script>
+</body>
+</html>
