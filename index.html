@@ -21,10 +21,16 @@
       padding: 20px;
       box-sizing: border-box;
     }
-    h2 {
+    h2, h3.plano-nome {
       text-align: center;
       color: #a1db00;
       margin-top: 0;
+    }
+    h3.plano-nome {
+        margin-bottom: 20px;
+        border: 1px solid #a1db00;
+        padding: 10px;
+        border-radius: 8px;
     }
     label {
       display: block;
@@ -50,6 +56,7 @@
       font-weight: bold;
       cursor: pointer;
       transition: background 0.2s;
+      margin-top: 20px;
     }
     button:hover {
       background: #89b000;
@@ -98,7 +105,8 @@
 <body>
 
   <div class="container">
-    <h2>Comparativo de Taxas PagLucro</h2>
+    <h2>Comparativo de Taxas</h2>
+    <h3 class="plano-nome">Plano PagLucro</h3>
 
     <label for="valor">Valor da Venda (R$):</label>
     <input 
@@ -108,13 +116,6 @@
       inputmode="decimal"
       pattern="[0-9]*"
     />
-
-    <label for="meuPlano">Meu Plano:</label>
-    <select id="meuPlano">
-      <option>Pag Pro</option>
-      <option>Pag Super</option>
-      <option>Pag Lucro</option>
-    </select>
 
     <label for="tonPlano">Plano do Ton:</label>
     <select id="tonPlano">
@@ -147,19 +148,11 @@
   </div>
 
   <script>
-    // Dados das minhas taxas ATUALIZADAS (Julho/2025)
+    // Dados das taxas ATUALIZADAS para o Plano PagLucro (Agosto/2025)
     const minhasTaxas = {
-      "Pag Pro": {
-        "Mastercard/Visa": { "Débito": 0.99, "Crédito à Vista": 2.99, "Crédito Parcelado": [6.28, 7.09, 7.89, 8.68, 9.46, 10.23, 10.99, 11.75, 12.50, 13.24, 13.97, 14.70, 15.41, 16.12, 16.82, 17.51, 18.20] },
-        "Elo":               { "Débito": 1.10, "Crédito à Vista": 3.20, "Crédito Parcelado": [6.28, 7.09, 7.89, 8.68, 9.46, 10.23, 10.99, 11.75, 12.50, 13.24, 13.97, 14.70, 15.41, 16.12, 16.82, 17.51, 18.20] }
-      },
-      "Pag Super": {
-        "Mastercard/Visa": { "Débito": 1.39, "Crédito à Vista": 2.91, "Crédito Parcelado": [4.58, 5.35, 6.11, 6.85, 7.59, 8.37, 9.09, 9.81, 10.51, 11.22, 11.91, 12.60, 13.28, 13.95, 14.62, 15.28, 15.93] },
-        "Elo":               { "Débito": 1.45, "Crédito à Vista": 3.24, "Crédito Parcelado": [4.73, 5.50, 6.26, 7.00, 7.74, 8.57, 9.29, 10.01, 10.71, 11.42, 12.11, 12.80, 13.48, 14.15, 14.82, 15.48, 16.13] }
-      },
       "Pag Lucro": {
-        "Mastercard/Visa": { "Débito": 1.39, "Crédito à Vista": 2.93, "Crédito Parcelado": [4.36, 5.13, 5.89, 6.63, 7.37, 7.97, 8.69, 9.41, 10.11, 10.82, 11.51, 12.20, 12.88, 13.55, 14.22, 14.88, 15.53] },
-        "Elo":               { "Débito": 1.45, "Crédito à Vista": 3.24, "Crédito Parcelado": [4.56, 5.33, 6.09, 6.83, 7.57, 8.17, 8.89, 9.61, 10.31, 11.02, 11.71, 12.40, 13.08, 13.75, 14.42, 15.08, 15.73] }
+        "Mastercard/Visa": { "Débito": 0.99, "Crédito à Vista": 2.99, "Crédito Parcelado": [4.41, 5.16, 5.91, 6.64, 7.38, 8.10, 8.81, 9.52, 10.22, 10.91, 11.60, 12.28, 12.95, 13.62, 14.27, 14.93, 15.57] },
+        "Elo":               { "Débito": 1.15, "Crédito à Vista": 3.35, "Crédito Parcelado": [4.41, 5.16, 5.91, 6.64, 7.38, 8.40, 9.11, 9.82, 10.52, 11.21, 11.90, 12.58, 13.25, 13.92, 14.57, 15.23, 15.87] }
       }
     };
 
@@ -213,8 +206,8 @@
       let valor = parseFloat(raw);
       if (!valor || valor <= 0) { alert("Digite um valor válido."); return; }
 
-      let meu   = document.getElementById("meuPlano").value,
-          ton   = document.getElementById("tonPlano").value,
+      const meu = "Pag Lucro"; // Plano fixo
+      let ton   = document.getElementById("tonPlano").value,
           ban   = document.getElementById("bandeira").value,
           tipo  = document.getElementById("tipo").value,
           p     = tipo === "Crédito Parcelado" ? parseInt(selParc.value) : 1;
