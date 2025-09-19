@@ -21,16 +21,10 @@
       padding: 20px;
       box-sizing: border-box;
     }
-    h2, h3.plano-nome {
+    h2 {
       text-align: center;
       color: #a1db00;
       margin-top: 0;
-    }
-    h3.plano-nome {
-        margin-bottom: 20px;
-        border: 1px solid #a1db00;
-        padding: 10px;
-        border-radius: 8px;
     }
     label {
       display: block;
@@ -105,8 +99,7 @@
 <body>
 
   <div class="container">
-    <h2>Comparativo de Taxas</h2>
-    <h3 class="plano-nome">Plano PagLucro</h3>
+    <h2>Comparativo de Taxas PagLucro</h2>
 
     <label for="valor">Valor da Venda (R$):</label>
     <input 
@@ -116,6 +109,12 @@
       inputmode="decimal"
       pattern="[0-9]*"
     />
+
+    <label for="meuPlano">Meu Plano:</label>
+    <select id="meuPlano">
+      <option>Pag Lucro</option>
+      <option>Pag Pro</option>
+    </select>
 
     <label for="tonPlano">Plano do Ton:</label>
     <select id="tonPlano">
@@ -148,11 +147,15 @@
   </div>
 
   <script>
-    // Dados das taxas ATUALIZADAS para o Plano PagLucro (Agosto/2025)
+    // Dados das minhas taxas ATUALIZADAS (Setembro/2025)
     const minhasTaxas = {
+      "Pag Pro": {
+        "Mastercard/Visa": { "Débito": 1.39, "Crédito à Vista": 3.15, "Crédito Parcelado": [5.16, 5.87, 6.59, 7.29, 8.00, 9.24, 9.93, 10.61, 11.27, 11.94, 12.61, 13.26, 13.90, 14.55, 15.18, 15.81, 16.43] },
+        "Elo":               { "Débito": 1.45, "Crédito à Vista": 3.44, "Crédito Parcelado": [5.31, 6.02, 6.74, 7.44, 8.15, 9.54, 10.23, 10.91, 11.57, 12.24, 12.91, 13.56, 14.20, 14.85, 15.48, 16.11, 16.73] }
+      },
       "Pag Lucro": {
-        "Mastercard/Visa": { "Débito": 0.99, "Crédito à Vista": 2.99, "Crédito Parcelado": [4.41, 5.16, 5.91, 6.64, 7.38, 8.10, 8.81, 9.52, 10.22, 10.91, 11.60, 12.28, 12.95, 13.62, 14.27, 14.93, 15.57] },
-        "Elo":               { "Débito": 1.15, "Crédito à Vista": 3.35, "Crédito Parcelado": [4.41, 5.16, 5.91, 6.64, 7.38, 8.40, 9.11, 9.82, 10.52, 11.21, 11.90, 12.58, 13.25, 13.92, 14.57, 15.23, 15.87] }
+        "Mastercard/Visa": { "Débito": 1.39, "Crédito à Vista": 2.93, "Crédito Parcelado": [4.46, 5.23, 5.99, 6.73, 7.47, 8.07, 8.79, 9.51, 10.21, 10.92, 11.61, 12.30, 12.98, 13.65, 14.32, 14.98, 15.63] },
+        "Elo":               { "Débito": 1.45, "Crédito à Vista": 3.24, "Crédito Parcelado": [4.66, 5.43, 6.19, 6.93, 7.67, 8.27, 8.99, 9.71, 10.41, 11.12, 11.81, 12.50, 13.18, 13.85, 14.52, 15.18, 15.83] }
       }
     };
 
@@ -206,8 +209,8 @@
       let valor = parseFloat(raw);
       if (!valor || valor <= 0) { alert("Digite um valor válido."); return; }
 
-      const meu = "Pag Lucro"; // Plano fixo
-      let ton   = document.getElementById("tonPlano").value,
+      let meu   = document.getElementById("meuPlano").value,
+          ton   = document.getElementById("tonPlano").value,
           ban   = document.getElementById("bandeira").value,
           tipo  = document.getElementById("tipo").value,
           p     = tipo === "Crédito Parcelado" ? parseInt(selParc.value) : 1;
@@ -234,7 +237,7 @@
         resultadoHtml = `
           <div class="cols">
             <div>
-              <h3>Minhas Taxas</h3>
+              <h3>Minhas Taxas (${meu})</h3>
               <p>Taxa: ${tMeu.toFixed(2)}%</p>
               <p>Você recebe: ${fmt(recMeu)}</p>
               <p>Deveria cobrar: ${fmt(cobMeu)}</p>
@@ -257,7 +260,7 @@
         resultadoHtml = `
           <div class="cols">
             <div>
-              <h3>Minhas Taxas</h3>
+              <h3>Minhas Taxas (${meu})</h3>
               <p>Taxa: ${tMeu.toFixed(2)}%</p>
               <p>Você recebe: ${fmt(recMeu)}</p>
               <p>Deveria cobrar: ${fmt(cobMeu)}</p>
